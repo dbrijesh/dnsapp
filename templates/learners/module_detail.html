@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ module.title }} - Lead-Up App{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="custom-breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'learners:my_program' %}">My Program</a></li>
+        <li class="breadcrumb-item active">{{ module.title }}</li>
+    </ol>
+</nav>
+
+<!-- Module Header -->
+<div class="mb-4">
+    <div class="d-flex align-items-center gap-2 mb-2">
+        <span class="module-type-badge {{ module.module_type }}">{{ module.module_type }}</span>
+        <span class="badge bg-info text-dark">Month {{ module.start_month }}{% if module.start_month != module.end_month %}-{{ module.end_month }}{% endif %}</span>
+        <span class="badge bg-secondary">{{ completion_percentage }}% Complete</span>
+    </div>
+    <h2 class="mb-2">{{ module.title }}</h2>
+    <p class="text-muted">{{ module.description }}</p>
+
+    <div class="d-flex gap-3 text-muted small">
+        <span><i class="bi bi-book me-1"></i>{{ lesson_data.count }} lessons</span>
+        <span><i class="bi bi-clock me-1"></i>{{ module.duration_minutes }} min total</span>
+        <span><i class="bi bi-check-circle me-1"></i>{{ completion_percentage }}% complete</span>
+    </div>
+</div>
+
+<!-- Module Progress -->
+<div class="card mb-4">
+    <div class="card-body">
+        <h6 class="mb-2">Module Progress</h6>
+        <div class="progress" style="height: 1.25rem;">
+            <div class="progress-bar bg-primary" role="progressbar"
+                 style="width: {{ completion_percentage }}%"
+                 aria-valuenow="{{ completion_percentage }}"
+                 aria-valuemin="0"
+                 aria-valuemax="100">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Lessons -->
+<h5 class="mb-3">Lessons</h5>
+
+{% for item in lesson_data %}
+<a href="{% url 'learners:lesson_view' item.lesson.id %}" class="text-decoration-none">
+    <div class="lesson-item">
+        <div class="lesson-number {{ item.progress.status }}">
+            {% if item.progress.status == 'completed' %}
+                <i class="bi bi-check-lg"></i>
+            {% elif item.progress.status == 'in_progress' %}
+                {{ forloop.counter }}
+            {% else %}
+                {{ forloop.counter }}
+            {% endif %}
+        </div>
+
+        <div class="flex-grow-1">
+            <h6 class="mb-1">{{ item.lesson.title }}</h6>
+            <div class="lesson-meta">
+                <span>
+                    {% if item.lesson.content_type == 'video' %}
+                        <i class="bi bi-play-circle lesson-content-icon"></i> Video
+                    {% elif item.lesson.content_type == 'document' %}
+                        <i class="bi bi-file-earmark-text lesson-content-icon"></i> Document
+                    {% elif item.lesson.content_type == 'text' %}
+                        <i class="bi bi-file-text lesson-content-icon"></i> Text
+                    {% elif item.lesson.content_type == 'audio' %}
+                        <i class="bi bi-mic lesson-content-icon"></i> Audio
+                    {% else %}
+                        <i class="bi bi-collection lesson-content-icon"></i> Mixed
+                    {% endif %}
+                </span>
+                <span><i class="bi bi-clock me-1"></i>{{ item.lesson.duration_minutes }} min</span>
+                <span><i class="bi bi-hourglass-split me-1"></i>Time spent: {{ item.progress.get_time_spent_display|default:"0 min" }}</span>
+                <span>{{ item.progress.progress_percentage }}% complete</span>
+                {% if item.lesson.is_optional %}
+                    <span class="badge bg-secondary">Optional</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="ms-auto">
+            <span class="status-badge {{ item.progress.status }}">{{ item.progress.status|title }}</span>
+        </div>
+    </div>
+</a>
+{% empty %}
+<p class="text-muted">No lessons available for this module.</p>
+{% endfor %}
+
+<!-- Module Assessment -->
+{% if assessment %}
+<div class="card mt-4">
+    <div class="card-body">
+        <h5 class="mb-3"><i class="bi bi-clipboard-check-fill text-primary me-2"></i>Module Assessment</h5>
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h6 class="mb-1">{{ assessment.title }}</h6>
+                <p class="text-muted mb-0">{{ assessment.description }}</p>
+                <small class="text-muted">{{ assessment.questions.count }} questions</small>
+            </div>
+            <a href="{% url 'learners:assessments' %}" class="btn btn-primary">
+                <i class="bi bi-pencil-square me-1"></i>View Assessments
+            </a>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ module.title }} - Admin{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb" class="custom-breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'admins:program_list' %}">Programs</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'admins:program_detail' program.id %}">{{ program.title }}</a></li>
+        <li class="breadcrumb-item active">{{ module.title }}</li>
+    </ol>
+</nav>
+
+<div class="d-flex justify-content-between align-items-start mb-4">
+    <div>
+        <h2>{{ module.title }}</h2>
+        <p class="text-muted">{{ module.description }}</p>
+        <div class="mt-2">
+            <span class="badge bg-secondary">{{ module.get_module_type_display }}</span>
+            <span class="badge bg-info text-dark">Month {{ module.start_month }}{% if module.start_month != module.end_month %}-{{ module.end_month }}{% endif %}</span>
+        </div>
+    </div>
+    <div>
+        <a href="{% url 'admins:module_edit' module.id %}" class="btn btn-outline-primary me-2">Edit</a>
+        <a href="{% url 'admins:lesson_create' module.id %}" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-1"></i> Add Lesson
+        </a>
+    </div>
+</div>
+
+{% if assessment %}
+<div class="alert alert-info mb-4">
+    <strong>Assessment:</strong> <a href="{% url 'admins:assessment_detail' assessment.id %}">{{ assessment.title }}</a> is linked to this module.
+    <a href="{% url 'admins:assessment_responses' assessment.id %}" class="btn btn-sm btn-outline-primary ms-2">View Responses</a>
+</div>
+{% endif %}
+
+<h5 class="mb-3">Lessons ({{ lessons.count }})</h5>
+
+{% for lesson in lessons %}
+<div class="card mb-3">
+    <div class="card-body">
+        <div class="d-flex justify-content-between">
+            <div>
+                <h6>{{ lesson.title }}</h6>
+                <span class="badge bg-secondary">{{ lesson.content_type }}</span>
+                <small class="text-muted ms-2">{{ lesson.duration_minutes }} min</small>
+            </div>
+            <div>
+                <a href="{% url 'admins:lesson_edit' lesson.id %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% empty %}
+<p class="text-muted">No lessons yet. <a href="{% url 'admins:lesson_create' module.id %}">Create first lesson</a></p>
+{% endfor %}
+{% endblock %}

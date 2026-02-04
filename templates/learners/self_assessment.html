@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}Self-Assessment - Lead-Up App{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-body p-5">
+                <h2 class="mb-2">{{ assessment.title }}</h2>
+                <p class="text-muted mb-4">{{ assessment.description }}</p>
+
+                <form method="post">
+                    {% csrf_token %}
+
+                    {% for question in questions %}
+                    <div class="mb-4 pb-4 border-bottom">
+                        <label class="form-label fw-bold">{{ forloop.counter }}. {{ question.question_text }}</label>
+
+                        {% if question.question_type == 'rating' %}
+                        <div class="d-flex align-items-center gap-3 mt-2">
+                            <span class="small text-muted">{{ question.min_label }}</span>
+                            {% for i in "12345" %}
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio"
+                                       name="question_{{ question.id }}"
+                                       id="q{{ question.id }}_{{ forloop.counter }}"
+                                       value="{{ forloop.counter }}" required>
+                                <label class="form-check-label" for="q{{ question.id }}_{{ forloop.counter }}">
+                                    {{ forloop.counter }}
+                                </label>
+                            </div>
+                            {% endfor %}
+                            <span class="small text-muted">{{ question.max_label }}</span>
+                        </div>
+                        {% elif question.question_type == 'text' %}
+                        <textarea class="form-control mt-2" name="question_{{ question.id }}" rows="3" required></textarea>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{% url 'learners:onboarding' program.id %}" class="btn btn-outline-secondary">Back</a>
+                        <button type="submit" class="btn btn-primary">Submit Assessment</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

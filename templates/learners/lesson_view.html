@@ -1,0 +1,237 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ lesson.title }} - Lead-Up App{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="custom-breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'learners:my_program' %}">My Program</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'learners:module_detail' module.id %}">{{ module.title }}</a></li>
+        <li class="breadcrumb-item active">{{ lesson.title }}</li>
+    </ol>
+</nav>
+
+<!-- Lesson Header -->
+<div class="row mb-4">
+    <div class="col-lg-8">
+        <div class="d-flex align-items-center gap-2 mb-2">
+            <span class="module-type-badge {{ module.module_type }}">{{ module.module_type }}</span>
+            <span class="status-badge {{ progress.status }}">{{ progress.progress_percentage }}% Completed</span>
+        </div>
+        <h2 class="mb-2">{{ lesson.title }}</h2>
+        <div class="d-flex gap-3 text-muted small">
+            <span><i class="bi bi-clock me-1"></i>{{ lesson.duration_minutes }} min</span>
+            {% if lesson.content_type == 'video' %}
+                <span><i class="bi bi-play-circle me-1"></i>Video</span>
+            {% elif lesson.content_type == 'document' %}
+                <span><i class="bi bi-file-earmark-text me-1"></i>Document</span>
+            {% elif lesson.content_type == 'text' %}
+                <span><i class="bi bi-file-text me-1"></i>Text</span>
+            {% elif lesson.content_type == 'audio' %}
+                <span><i class="bi bi-mic me-1"></i>Audio</span>
+            {% else %}
+                <span><i class="bi bi-collection me-1"></i>Mixed Content</span>
+            {% endif %}
+        </div>
+    </div>
+    <div class="col-lg-4 text-end">
+        <form method="post" action="{% url 'learners:mark_lesson_complete' lesson.id %}">
+            {% csrf_token %}
+            {% if progress.status != 'completed' %}
+                <button type="submit" name="complete" class="btn btn-success">
+                    <i class="bi bi-check-circle me-1"></i>Mark as Complete
+                </button>
+            {% else %}
+                <button type="button" class="btn btn-outline-success" disabled>
+                    <i class="bi bi-check-circle-fill me-1"></i>Completed
+                </button>
+            {% endif %}
+        </form>
+    </div>
+</div>
+
+<!-- Lesson Content -->
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card mb-4">
+            <div class="card-body">
+                <!-- Video Content -->
+                {% if video_url %}
+                <div class="mb-4">
+                    <video controls class="w-100" style="border-radius: 0.5rem;">
+                        <source src="{{ video_url }}" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+                {% endif %}
+
+                <!-- Audio Content -->
+                {% if audio_url %}
+                <div class="mb-4">
+                    <audio controls class="w-100">
+                        <source src="{{ audio_url }}" type="audio/mpeg">
+                        Your browser does not support the audio tag.
+                    </audio>
+                </div>
+                {% endif %}
+
+                <!-- Text Content -->
+                {% if lesson.text_content %}
+                <div class="mb-4">
+                    <h5>Introduction to Leadership</h5>
+                    <div>{{ lesson.text_content|linebreaks }}</div>
+                </div>
+                {% endif %}
+
+                <!-- Document Content -->
+                {% if document_url %}
+                <div class="mb-4">
+                    <a href="{{ document_url }}" target="_blank" class="btn btn-outline-primary">
+                        <i class="bi bi-file-earmark-pdf me-2"></i>Download Course Material
+                    </a>
+                </div>
+                {% endif %}
+
+                <!-- Navigation -->
+                <div class="d-flex justify-content-between mt-4 pt-3 border-top">
+                    {% if prev_lesson %}
+                        <a href="{% url 'learners:lesson_view' prev_lesson.id %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i> Previous Lesson
+                        </a>
+                    {% else %}
+                        <div></div>
+                    {% endif %}
+
+                    {% if next_lesson %}
+                        <form method="post" action="{% url 'learners:mark_lesson_complete' lesson.id %}" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" name="continue" class="btn btn-primary">
+                                Next Lesson <i class="bi bi-arrow-right ms-1"></i>
+                            </button>
+                        </form>
+                    {% else %}
+                        <a href="{% url 'learners:module_detail' module.id %}" class="btn btn-primary">
+                            Back to Module
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="mb-3">Your Learning Journey</h6>
+
+                <div class="mb-3">
+                    <p class="small text-muted mb-1">
+                        <i class="bi bi-hourglass-split me-1"></i>
+                        Time Spent
+                    </p>
+                    <h5 class="mb-0" id="time-spent-display">{{ progress.get_time_spent_display|default:"0 min" }}</h5>
+                    <small class="text-muted">Current session: <span id="session-time">0:00</span></small>
+                </div>
+
+                {% if progress.started_at %}
+                <p class="small text-muted mb-2">
+                    <i class="bi bi-calendar3 me-1"></i>
+                    Started: {{ progress.started_at|date:"M d, Y" }}
+                </p>
+                {% endif %}
+
+                {% if progress.first_accessed_at %}
+                <p class="small text-muted mb-2">
+                    <i class="bi bi-clock-history me-1"></i>
+                    First Accessed: {{ progress.first_accessed_at|date:"M d, Y" }}
+                </p>
+                {% endif %}
+
+                {% if progress.completed_at %}
+                <p class="small text-muted mb-0">
+                    <i class="bi bi-check-circle me-1"></i>
+                    Completed: {{ progress.completed_at|date:"M d, Y" }}
+                </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Time tracking for lesson
+    let sessionStartTime = Date.now();
+    let sessionTimeSeconds = 0;
+    let totalTimeSeconds = {{ progress.total_time_spent_seconds|default:0 }};
+
+    // Update session timer every second
+    setInterval(function() {
+        sessionTimeSeconds = Math.floor((Date.now() - sessionStartTime) / 1000);
+        let minutes = Math.floor(sessionTimeSeconds / 60);
+        let seconds = sessionTimeSeconds % 60;
+        document.getElementById('session-time').textContent =
+            minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
+    }, 1000);
+
+    // Send time update to server every 30 seconds
+    setInterval(function() {
+        sendTimeUpdate();
+    }, 30000);
+
+    // Send time update when leaving page
+    window.addEventListener('beforeunload', function() {
+        sendTimeUpdate();
+    });
+
+    function sendTimeUpdate() {
+        let timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
+
+        if (timeSpent < 5) {
+            return; // Don't send if less than 5 seconds
+        }
+
+        fetch("{% url 'learners:update_lesson_time' lesson.id %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+                time_spent: timeSpent
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                // Update total time display
+                document.getElementById('time-spent-display').textContent = data.time_display;
+                totalTimeSeconds = data.total_time;
+                // Reset session timer
+                sessionStartTime = Date.now();
+            }
+        })
+        .catch(error => {
+            console.error('Error updating time:', error);
+        });
+    }
+
+    // Helper function to get CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Lead-Up App{% endblock %}
+
+{% block content %}
+<!-- Onboarding Alert -->
+{% if not onboarding_complete %}
+<div class="alert-banner">
+    <div>
+        <i class="bi bi-rocket-takeoff me-2"></i>
+        <strong>Complete Your Onboarding</strong>
+        <p class="mb-0 mt-1 small">Welcome to the Leadership Training Program! Please complete your onboarding to access all program features and begin your journey.</p>
+    </div>
+    <a href="{% url 'learners:onboarding' program.id %}" class="btn btn-light">Start Onboarding</a>
+</div>
+{% endif %}
+
+<!-- Welcome Section -->
+<div class="mb-4">
+    <h2 class="mb-1">Welcome back, Learner! 👋</h2>
+    <p class="text-muted">Continue your leadership journey</p>
+</div>
+
+<!-- Metrics Row -->
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="metric-card">
+            <div class="d-flex align-items-center">
+                <div class="metric-icon blue">
+                    <i class="bi bi-graph-up"></i>
+                </div>
+                <div class="ms-3">
+                    <div class="metric-value">{{ overall_progress }}%</div>
+                    <div class="metric-label">Overall Progress</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="metric-card">
+            <div class="d-flex align-items-center">
+                <div class="metric-icon green">
+                    <i class="bi bi-check-circle-fill"></i>
+                </div>
+                <div class="ms-3">
+                    <div class="metric-value">{{ completed_lessons }}/{{ total_lessons }}</div>
+                    <div class="metric-label">Lessons Completed</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="metric-card">
+            <div class="d-flex align-items-center">
+                <div class="metric-icon orange">
+                    <i class="bi bi-trophy-fill"></i>
+                </div>
+                <div class="ms-3">
+                    <div class="metric-value">{{ badges_earned }}</div>
+                    <div class="metric-label">Badges Earned</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="metric-card">
+            <div class="d-flex align-items-center">
+                <div class="metric-icon cyan">
+                    <i class="bi bi-list-check"></i>
+                </div>
+                <div class="ms-3">
+                    <div class="metric-value">{{ upcoming_lessons.count }}</div>
+                    <div class="metric-label">Upcoming Tasks</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content Row -->
+<div class="row g-4">
+    <!-- Module Progress -->
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title mb-4">Module Progress</h5>
+
+                {% for item in module_progress_data %}
+                <div class="month-progress-item">
+                    <div class="month-progress-header">
+                        <div>
+                            <span class="month-progress-label">{{ item.module.title }}</span>
+                            <div class="small text-muted mt-1">
+                                <span class="badge bg-secondary">{{ item.module.get_module_type_display }}</span>
+                                <span class="badge bg-info text-dark">Month {{ item.module.start_month }}{% if item.module.start_month != item.module.end_month %}-{{ item.module.end_month }}{% endif %}</span>
+                                • {{ item.lessons_completed }}/{{ item.lessons_total }} lessons
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="month-progress-percentage">{{ item.progress }}%</span>
+                            <span class="status-badge {{ item.status }}">{{ item.status|title|cut:"_" }}</span>
+                        </div>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar {% if item.status == 'completed' %}bg-success{% elif item.status == 'in_progress' %}bg-warning{% else %}bg-secondary{% endif %}"
+                             role="progressbar"
+                             style="width: {{ item.progress }}%"
+                             aria-valuenow="{{ item.progress }}"
+                             aria-valuemin="0"
+                             aria-valuemax="100">
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-muted">No modules available yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Upcoming Tasks -->
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title mb-4">Upcoming Tasks</h5>
+
+                {% for progress in upcoming_lessons %}
+                <div class="task-item">
+                    <div class="task-title">{{ progress.lesson.module.title }}: {{ progress.lesson.title }}</div>
+                    <div class="task-due text-muted">
+                        {% if progress.status == 'in_progress' %}
+                            Due: Tomorrow
+                        {% else %}
+                            Due: In 3 days
+                        {% endif %}
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-muted mb-0">No upcoming tasks</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

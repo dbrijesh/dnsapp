@@ -1,0 +1,27 @@
+############################################
+# Lead-Up App - Azure Deployment Configuration
+############################################
+
+# IMPORTANT: Update these values before deploying
+# Container Registry and Storage Account names must be:
+# - Globally unique across all Azure
+# - Lowercase letters and numbers only
+# - No special characters, hyphens, or underscores
+
+RESOURCE_GROUP=leadup-rg
+LOCATION=eastus
+
+# Make these unique by adding your initials or random numbers
+# Example: leadupacr123 or leadupacrjohn
+ACR_NAME=leadupacr
+STORAGE_ACCOUNT=leadupstorage
+
+CONTAINER_NAME=course-materials
+ENVIRONMENT_NAME=leadup-env
+APP_NAME=leadup-app
+
+############################################
+# After updating the names above, run:
+# PowerShell: .\deploy-azure.ps1
+# Or deploy manually following DEPLOYMENT.md
+############################################

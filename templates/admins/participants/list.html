@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}Participants - Admin{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Participants</h2>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Joined</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for learner in learners %}
+                    <tr>
+                        <td>{{ learner.first_name }} {{ learner.last_name }}</td>
+                        <td>{{ learner.email }}</td>
+                        <td>{{ learner.date_joined|date:"M d, Y" }}</td>
+                        <td>
+                            <a href="{% url 'admins:participant_progress' learner.id %}" class="btn btn-sm btn-primary">View Progress</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center text-muted">No participants yet</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

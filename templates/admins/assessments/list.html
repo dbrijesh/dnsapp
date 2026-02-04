@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}Assessments - Admin{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2>Assessments</h2>
+        <p class="text-muted mb-0">Manage questionnaires and assessments</p>
+    </div>
+    <a href="{% url 'admins:assessment_create' %}" class="btn btn-primary">
+        <i class="bi bi-plus-circle me-1"></i> Create Assessment
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Type</th>
+                    <th>Questions</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for assessment in assessments %}
+                <tr>
+                    <td>{{ assessment.title }}</td>
+                    <td>
+                        {% if assessment.is_onboarding %}
+                            <span class="badge bg-primary">Onboarding</span>
+                        {% else %}
+                            <span class="badge bg-secondary">Module</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ assessment.questions.count }}</td>
+                    <td>
+                        <a href="{% url 'admins:assessment_detail' assessment.id %}" class="btn btn-sm btn-outline-primary">View</a>
+                        <a href="{% url 'admins:assessment_edit' assessment.id %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center text-muted">No assessments found</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

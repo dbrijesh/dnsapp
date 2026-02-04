@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ month.title }} - Admin{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb" class="custom-breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'admins:program_list' %}">Programs</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'admins:program_detail' program.id %}">{{ program.title }}</a></li>
+        <li class="breadcrumb-item active">{{ month.title }}</li>
+    </ol>
+</nav>
+
+<div class="d-flex justify-content-between align-items-start mb-4">
+    <div>
+        <h2>Month {{ month.month_number }}: {{ month.title }}</h2>
+        <p class="text-muted">{{ month.description }}</p>
+    </div>
+    <div>
+        <a href="{% url 'admins:month_edit' month.id %}" class="btn btn-outline-primary me-2">Edit</a>
+        <a href="{% url 'admins:module_create' month.id %}" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-1"></i> Add Module
+        </a>
+    </div>
+</div>
+
+<h5 class="mb-3">Modules ({{ modules.count }})</h5>
+
+{% for module in modules %}
+<div class="card mb-3">
+    <div class="card-body">
+        <div class="d-flex justify-content-between">
+            <div>
+                <h6>{{ module.title }}</h6>
+                <p class="text-muted small mb-2">{{ module.description }}</p>
+                <span class="badge bg-info">{{ module.module_type }}</span>
+                <small class="text-muted ms-2">{{ module.lessons.count }} lessons</small>
+            </div>
+            <div>
+                <a href="{% url 'admins:module_detail' module.id %}" class="btn btn-sm btn-outline-primary me-1">View</a>
+                <a href="{% url 'admins:module_edit' module.id %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% empty %}
+<p class="text-muted">No modules yet. <a href="{% url 'admins:module_create' month.id %}">Create first module</a></p>
+{% endfor %}
+{% endblock %}

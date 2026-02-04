@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+{% block title %}My Program - Lead-Up App{% endblock %}
+
+{% block content %}
+<!-- Program Header -->
+<div class="mb-4">
+    <h2 class="mb-1">{{ program.title }}</h2>
+    <p class="text-muted">{{ program.description }}</p>
+</div>
+
+<!-- Overall Progress -->
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="d-flex align-items-center mb-2">
+            <i class="bi bi-calendar3 me-2 text-primary"></i>
+            <h6 class="mb-0">Your Program Progress</h6>
+        </div>
+        <div class="d-flex align-items-center">
+            <div class="flex-grow-1 me-3">
+                <div class="progress" style="height: 1.5rem;">
+                    <div class="progress-bar bg-primary" role="progressbar"
+                         style="width: {{ overall_progress }}%"
+                         aria-valuenow="{{ overall_progress }}"
+                         aria-valuemin="0"
+                         aria-valuemax="100">
+                    </div>
+                </div>
+            </div>
+            <div>
+                <strong>{{ overall_progress }}%</strong>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- All Modules with Lessons -->
+<h5 class="mb-3">All Modules & Lessons</h5>
+
+{% for item in module_data %}
+<div class="card mb-3">
+    <div class="card-header bg-light">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h5 class="mb-0">{{ item.module.title }}</h5>
+                <small class="text-muted">
+                    <span class="badge bg-secondary">{{ item.module.get_module_type_display }}</span>
+                    <span class="badge bg-info text-dark">Month {{ item.module.start_month }}{% if item.module.start_month != item.module.end_month %}-{{ item.module.end_month }}{% endif %}</span>
+                    • {{ item.module.duration_minutes }} minutes
+                </small>
+            </div>
+            <div class="text-end">
+                <div class="mb-1"><strong>{{ item.completion_percentage }}%</strong> Complete</div>
+                <div class="progress" style="width: 150px; height: 8px;">
+                    <div class="progress-bar {% if item.status == 'completed' %}bg-success{% elif item.status == 'in_progress' %}bg-warning{% else %}bg-secondary{% endif %}"
+                         style="width: {{ item.completion_percentage }}%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <p class="text-muted">{{ item.module.description }}</p>
+
+        <!-- Lessons Table -->
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th style="width: 50%;">Lesson</th>
+                    <th>Type</th>
+                    <th>Duration</th>
+                    <th>Time Spent</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for lesson_item in item.lessons %}
+                <tr>
+                    <td>
+                        <strong>{{ lesson_item.lesson.title }}</strong>
+                        {% if lesson_item.lesson.description %}
+                        <br><small class="text-muted">{{ lesson_item.lesson.description|truncatewords:15 }}</small>
+                        {% endif %}
+                    </td>
+                    <td><span class="badge bg-secondary">{{ lesson_item.lesson.get_content_type_display }}</span></td>
+                    <td>{{ lesson_item.lesson.duration_minutes }} min</td>
+                    <td>{{ lesson_item.time_spent }}</td>
+                    <td>
+                        <span class="badge
+                            {% if lesson_item.status == 'completed' %}bg-success
+                            {% elif lesson_item.status == 'in_progress' %}bg-warning text-dark
+                            {% else %}bg-secondary{% endif %}">
+                            {{ lesson_item.status|title|cut:"_" }}
+                        </span>
+                    </td>
+                    <td>
+                        <a href="{% url 'learners:lesson_view' lesson_item.lesson.id %}" class="btn btn-sm btn-primary">
+                            {% if lesson_item.status == 'completed' %}Review{% elif lesson_item.status == 'in_progress' %}Continue{% else %}Start{% endif %}
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% if item.assessment %}
+        <div class="alert alert-info mt-3 mb-0">
+            <strong><i class="bi bi-clipboard-check me-2"></i>Module Assessment:</strong> {{ item.assessment.title }}
+            <a href="{% url 'learners:module_detail' item.module.id %}" class="btn btn-sm btn-outline-primary ms-2">Take Assessment</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% empty %}
+<div class="alert alert-info">
+    No modules available yet.
+</div>
+{% endfor %}
+
+{% endblock %}

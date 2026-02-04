@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ assessment.title }} - Responses{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb" class="custom-breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'admins:assessment_list' %}">Assessments</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'admins:assessment_detail' assessment.id %}">{{ assessment.title }}</a></li>
+        <li class="breadcrumb-item active">Responses</li>
+    </ol>
+</nav>
+
+<div class="mb-4">
+    <h2>{{ assessment.title }} - User Responses</h2>
+    <p class="text-muted">{{ assessment.description }}</p>
+</div>
+
+{% if user_responses %}
+{% for item in user_responses %}
+<div class="card mb-3">
+    <div class="card-header">
+        <strong>{{ item.user.first_name }} {{ item.user.last_name }}</strong> ({{ item.user.email }})
+    </div>
+    <div class="card-body">
+        <table class="table table-sm mb-0">
+            <thead>
+                <tr>
+                    <th style="width: 50%;">Question</th>
+                    <th>Response</th>
+                    <th>Submitted</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for response in item.responses %}
+                <tr>
+                    <td>{{ response.question.question_text }}</td>
+                    <td>
+                        {% if response.rating_value %}
+                            <strong>{{ response.rating_value }}</strong> / {{ response.question.max_rating }}
+                            <span class="text-muted">({{ response.question.min_label }} - {{ response.question.max_label }})</span>
+                        {% elif response.text_value %}
+                            {{ response.text_value }}
+                        {% endif %}
+                    </td>
+                    <td>{{ response.submitted_at|date:"M d, Y" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endfor %}
+{% else %}
+<div class="alert alert-info">
+    No responses submitted yet.
+</div>
+{% endif %}
+
+{% endblock %}

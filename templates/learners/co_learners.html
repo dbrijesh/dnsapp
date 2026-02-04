@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block title %}Co-Learners - Lead-Up App{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h2 class="mb-1">Co-Learners</h2>
+    <p class="text-muted">Connect with fellow participants in {{ program.title }}</p>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="d-flex align-items-center">
+            <i class="bi bi-people-fill text-primary fs-3 me-3"></i>
+            <div>
+                <h5 class="mb-0">{{ total_co_learners }} Active Participants</h5>
+                <small class="text-muted">Learn together, grow together</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    {% for learner_item in co_learners %}
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="avatar-circle me-3">
+                        <i class="bi bi-person-fill"></i>
+                    </div>
+                    <div>
+                        <h6 class="mb-0">{{ learner_item.user.first_name }} {{ learner_item.user.last_name }}</h6>
+                        <small class="text-muted">{{ learner_item.user.email }}</small>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <small class="text-muted">Progress</small>
+                        <small><strong>{{ learner_item.progress }}%</strong></small>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar bg-success"
+                             style="width: {{ learner_item.progress }}%"></div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="text-center">
+                        <i class="bi bi-check-circle-fill text-success"></i>
+                        <div class="small text-muted">{{ learner_item.lessons_completed }} lessons</div>
+                    </div>
+                    <div class="text-center">
+                        <i class="bi bi-trophy-fill text-warning"></i>
+                        <div class="small text-muted">{{ learner_item.badges_count }} badges</div>
+                    </div>
+                    <div class="text-center">
+                        <i class="bi bi-calendar-check text-primary"></i>
+                        <div class="small text-muted">{{ learner_item.enrolled_at|timesince }} ago</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="alert alert-info">
+            No other participants yet. You're the first!
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<style>
+.avatar-circle {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+}
+</style>
+
+{% endblock %}

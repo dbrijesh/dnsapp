@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ month.title }} - Lead-Up App{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="custom-breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'learners:my_program' %}">Program</a></li>
+        <li class="breadcrumb-item active">Month {{ month.month_number }}</li>
+    </ol>
+</nav>
+
+<!-- Month Header -->
+<div class="mb-4">
+    <div class="d-flex align-items-center gap-2 mb-2">
+        <span class="month-badge">Month {{ month.month_number }}</span>
+    </div>
+    <h2 class="mb-2">{{ month.title }}</h2>
+    <p class="text-muted">{{ month.description }}</p>
+</div>
+
+<!-- Learning Objectives -->
+{% if month.learning_objectives %}
+<div class="card mb-4" style="border-left: 4px solid #2563eb;">
+    <div class="card-body">
+        <h6 class="mb-2"><i class="bi bi-lightbulb text-primary me-2"></i>Learning Objectives</h6>
+        <p class="mb-0">{{ month.learning_objectives }}</p>
+    </div>
+</div>
+{% endif %}
+
+<!-- Month Progress -->
+<div class="card mb-4">
+    <div class="card-body">
+        <h6 class="mb-2">Month Progress</h6>
+        <div class="d-flex align-items-center">
+            <div class="flex-grow-1 me-3">
+                <div class="progress" style="height: 1.25rem;">
+                    <div class="progress-bar bg-primary" role="progressbar"
+                         style="width: {{ month_progress }}%"
+                         aria-valuenow="{{ month_progress }}"
+                         aria-valuemin="0"
+                         aria-valuemax="100">
+                    </div>
+                </div>
+            </div>
+            <div>
+                <strong>{{ month_progress }}%</strong>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modules -->
+<h5 class="mb-3">Modules</h5>
+
+{% for item in module_data %}
+<a href="{% url 'learners:module_detail' item.module.id %}" class="text-decoration-none">
+    <div class="module-card">
+        <div class="d-flex align-items-start">
+            <div class="module-icon {{ item.module.module_type }}">
+                {% if item.module.module_type == 'behavioral' %}
+                    <i class="bi bi-person-hearts"></i>
+                {% elif item.module.module_type == 'technical' %}
+                    <i class="bi bi-code-slash"></i>
+                {% else %}
+                    <i class="bi bi-briefcase-fill"></i>
+                {% endif %}
+            </div>
+
+            <div class="flex-grow-1 ms-3">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <span class="module-type-badge {{ item.module.module_type }}">{{ item.module.module_type }}</span>
+                            <span class="status-badge {{ item.status }}">{{ item.status|title }}</span>
+                        </div>
+                        <h6 class="mb-1">{{ item.module.title }}</h6>
+                        <p class="text-muted small mb-2">{{ item.module.description }}</p>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center gap-3 mb-2">
+                    <small class="text-muted">
+                        <i class="bi bi-book me-1"></i>
+                        {{ item.total_lessons }} lessons
+                    </small>
+                    <small class="text-muted">
+                        <i class="bi bi-clock me-1"></i>
+                        {{ item.module.duration_minutes }} min total
+                    </small>
+                    <small class="text-muted">
+                        <i class="bi bi-check-circle me-1"></i>
+                        {{ item.completed_lessons }}/{{ item.total_lessons }} completed
+                    </small>
+                </div>
+
+                <div class="d-flex align-items-center">
+                    <span class="small text-muted me-2">Progress</span>
+                    <div class="flex-grow-1 me-2">
+                        <div class="progress" style="height: 0.5rem;">
+                            <div class="progress-bar {% if item.status == 'completed' %}bg-success{% elif item.status == 'in_progress' %}bg-warning{% else %}bg-secondary{% endif %}"
+                                 role="progressbar"
+                                 style="width: {{ item.completion_percentage }}%"
+                                 aria-valuenow="{{ item.completion_percentage }}"
+                                 aria-valuemin="0"
+                                 aria-valuemax="100">
+                            </div>
+                        </div>
+                    </div>
+                    <span class="small fw-bold">{{ item.completion_percentage }}%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</a>
+{% empty %}
+<p class="text-muted">No modules available for this month.</p>
+{% endfor %}
+{% endblock %}

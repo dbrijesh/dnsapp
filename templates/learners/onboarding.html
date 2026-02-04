@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block title %}Onboarding - Lead-Up App{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-body p-5">
+                <div class="text-center mb-4">
+                    <i class="bi bi-rocket-takeoff" style="font-size: 3rem; color: var(--primary-color);"></i>
+                    <h2 class="mt-3">Welcome to {{ program.title }}!</h2>
+                    <p class="text-muted">{{ template.welcome_message }}</p>
+                </div>
+
+                <div class="progress mb-4" style="height: 0.5rem;">
+                    <div class="progress-bar bg-primary" role="progressbar"
+                         style="width: {% if onboarding.pledge_accepted and onboarding.assessment_completed %}100{% elif onboarding.pledge_accepted %}50{% else %}0{% endif %}%">
+                    </div>
+                </div>
+
+                <div class="list-group list-group-flush">
+                    <div class="list-group-item d-flex align-items-center">
+                        <div class="me-3">
+                            {% if onboarding.pledge_accepted %}
+                                <i class="bi bi-check-circle-fill text-success" style="font-size: 1.5rem;"></i>
+                            {% else %}
+                                <i class="bi bi-circle text-muted" style="font-size: 1.5rem;"></i>
+                            {% endif %}
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1">Accept Program Pledge</h6>
+                            <p class="mb-0 small text-muted">Commit to the leadership journey</p>
+                        </div>
+                        {% if not onboarding.pledge_accepted %}
+                            <a href="{% url 'learners:accept_pledge' program.id %}" class="btn btn-primary btn-sm">Start</a>
+                        {% endif %}
+                    </div>
+
+                    <div class="list-group-item d-flex align-items-center">
+                        <div class="me-3">
+                            {% if onboarding.assessment_completed %}
+                                <i class="bi bi-check-circle-fill text-success" style="font-size: 1.5rem;"></i>
+                            {% else %}
+                                <i class="bi bi-circle text-muted" style="font-size: 1.5rem;"></i>
+                            {% endif %}
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1">Complete Self-Assessment</h6>
+                            <p class="mb-0 small text-muted">Help us understand your starting point</p>
+                        </div>
+                        {% if onboarding.pledge_accepted and not onboarding.assessment_completed %}
+                            <a href="{% url 'learners:self_assessment' program.id %}" class="btn btn-primary btn-sm">Start</a>
+                        {% elif not onboarding.pledge_accepted %}
+                            <button class="btn btn-secondary btn-sm" disabled>Locked</button>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if onboarding.onboarding_completed %}
+                <div class="text-center mt-4">
+                    <a href="{% url 'learners:dashboard' %}" class="btn btn-success btn-lg">
+                        <i class="bi bi-check-circle me-2"></i>Go to Dashboard
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ participant.first_name }} {{ participant.last_name }} - Progress{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb" class="custom-breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'admins:participant_list' %}">Participants</a></li>
+        <li class="breadcrumb-item active">{{ participant.email }}</li>
+    </ol>
+</nav>
+
+<div class="mb-4">
+    <h2>{{ participant.first_name }} {{ participant.last_name }}</h2>
+    <p class="text-muted">{{ participant.email }}</p>
+</div>
+
+{% if not program %}
+<div class="alert alert-warning">
+    This participant is not enrolled in any active program.
+</div>
+{% else %}
+<div class="card mb-4">
+    <div class="card-body">
+        <h5>{{ program.title }}</h5>
+        <div class="progress mt-2" style="height: 25px;">
+            <div class="progress-bar" role="progressbar" style="width: {{ enrollment.get_overall_progress }}%;">
+                {{ enrollment.get_overall_progress }}%
+            </div>
+        </div>
+    </div>
+</div>
+
+<h5 class="mb-3">Module Progress</h5>
+
+{% for item in module_progress_data %}
+<div class="card mb-3">
+    <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <strong>{{ item.module.title }}</strong>
+                <span class="badge bg-info text-dark ms-2">Month {{ item.module.start_month }}{% if item.module.start_month != item.module.end_month %}-{{ item.module.end_month }}{% endif %}</span>
+            </div>
+            <a href="{% url 'admins:override_module' participant.id item.module.id %}" class="btn btn-sm btn-outline-secondary">Override Status</a>
+        </div>
+    </div>
+    <div class="card-body">
+        <table class="table table-sm">
+            <thead>
+                <tr>
+                    <th>Lesson</th>
+                    <th>Status</th>
+                    <th>Time Spent</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for lesson_item in item.lessons %}
+                <tr>
+                    <td>{{ lesson_item.lesson.title }}</td>
+                    <td>
+                        {% if lesson_item.progress %}
+                            <span class="badge
+                                {% if lesson_item.progress.status == 'completed' %}bg-success
+                                {% elif lesson_item.progress.status == 'in_progress' %}bg-warning text-dark
+                                {% else %}bg-secondary{% endif %}">
+                                {{ lesson_item.progress.get_status_display }}
+                            </span>
+                            {% if lesson_item.progress.is_overridden %}
+                                <span class="badge bg-danger" title="Admin overridden">Override</span>
+                            {% endif %}
+                        {% else %}
+                            <span class="badge bg-secondary">Not Started</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if lesson_item.progress %}
+                            {{ lesson_item.progress.get_time_spent_display }}
+                        {% else %}
+                            0 min
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'admins:override_lesson' participant.id lesson_item.lesson.id %}" class="btn btn-sm btn-outline-primary">Override</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endfor %}
+
+{% if assessment_responses %}
+<h5 class="mb-3 mt-4">Assessment Responses</h5>
+
+{% for item in assessment_responses %}
+<div class="card mb-3">
+    <div class="card-header">
+        <strong>{{ item.assessment.title }}</strong>
+    </div>
+    <div class="card-body">
+        <table class="table table-sm">
+            <thead>
+                <tr>
+                    <th>Question</th>
+                    <th>Response</th>
+                    <th>Submitted</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for response in item.responses %}
+                <tr>
+                    <td>{{ response.question.question_text }}</td>
+                    <td>
+                        {% if response.rating_value %}
+                            {{ response.rating_value }} / {{ response.question.max_rating }}
+                        {% elif response.text_value %}
+                            {{ response.text_value|truncatewords:20 }}
+                        {% endif %}
+                    </td>
+                    <td>{{ response.submitted_at|date:"M d, Y H:i" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endfor %}
+{% endif %}
+{% endif %}
+
+{% endblock %}

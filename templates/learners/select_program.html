@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}Select Program - Lead-Up App{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h2>Select a Program</h2>
+    <p class="text-muted">Choose a leadership program to begin your journey</p>
+</div>
+
+<div class="row g-4">
+    {% for program in programs %}
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">{{ program.title }}</h5>
+                <p class="card-text">{{ program.description }}</p>
+                <p class="text-muted small">
+                    <i class="bi bi-calendar3 me-1"></i>{{ program.duration_months }} months
+                </p>
+                <a href="{% url 'learners:enroll_program' program.id %}" class="btn btn-primary">
+                    Enroll Now
+                </a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="text-center py-5">
+            <p class="text-muted">No programs available at this time.</p>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

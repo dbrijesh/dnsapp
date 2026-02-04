@@ -1,0 +1,10 @@
+# Django Framework - Local Development Only
+Django==4.2.7
+django-crispy-forms==2.1
+crispy-bootstrap5==2024.2
+
+# Static file serving
+whitenoise==6.6.0
+
+# Environment variables
+python-dotenv==1.0.0

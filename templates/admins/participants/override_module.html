@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}Override Module Status{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h2>Override Module Completion</h2>
+    <p class="text-muted">Participant: {{ participant.email }}</p>
+    <p class="text-muted">Module: {{ module.title }}</p>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="status" class="form-label">Status</label>
+                <select name="status" id="status" class="form-select" required>
+                    <option value="not_started">Not Started</option>
+                    <option value="in_progress">In Progress</option>
+                    <option value="completed">Completed</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="note" class="form-label">Override Note (optional)</label>
+                <textarea name="note" id="note" class="form-control" rows="3" placeholder="Reason for override..."></textarea>
+            </div>
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">Save Override</button>
+                <a href="{% url 'admins:participant_progress' participant.id %}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
