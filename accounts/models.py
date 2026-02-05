@@ -9,7 +9,13 @@ class UserManager(BaseUserManager):
             raise ValueError('The Email field must be set')
         email = self.normalize_email(email)
         user = self.model(email=email, **extra_fields)
-        user.set_password(password)
+
+        # Set password if provided, otherwise unusable password for SSO users
+        if password:
+            user.set_password(password)
+        else:
+            user.set_unusable_password()
+
         user.save(using=self._db)
         return user
 
@@ -17,7 +23,28 @@ class UserManager(BaseUserManager):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
         extra_fields.setdefault('is_admin', True)
+
+        # Superusers always need a password for Django admin
+        if not password:
+            raise ValueError('Superusers must have a password')
+
         return self.create_user(email, password, **extra_fields)
+
+    def create_sso_user(self, email, first_name='', last_name='', azure_ad_user_id='', **extra_fields):
+        """Create a new SSO user without a password."""
+        extra_fields.setdefault('is_active', True)
+        extra_fields.setdefault('is_learner', extra_fields.get('is_learner', False))
+        extra_fields.setdefault('is_admin', extra_fields.get('is_admin', False))
+
+        user = self.create_user(
+            email=email,
+            password=None,
+            first_name=first_name,
+            last_name=last_name,
+            azure_ad_user_id=azure_ad_user_id,
+            **extra_fields
+        )
+        return user
 
 
 class User(AbstractBaseUser, PermissionsMixin):

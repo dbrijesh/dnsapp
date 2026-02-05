@@ -64,6 +64,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'core.context_processors.azure_sso_settings',
             ],
         },
     },
@@ -142,19 +143,29 @@ if USE_AZURE_STORAGE:
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Authentication backends
-AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',
-]
-
-# Azure AD SSO configuration (optional for production)
+# Azure AD SSO configuration
 USE_AZURE_AD_SSO = os.environ.get('USE_AZURE_AD_SSO', 'False') == 'True'
+
 if USE_AZURE_AD_SSO:
-    AUTHENTICATION_BACKENDS.insert(0, 'accounts.backends.AzureADBackend')
+    # When SSO is enabled, ONLY use Azure AD backend (no password fallback)
+    AUTHENTICATION_BACKENDS = ['accounts.backends.AzureADBackend']
+
+    # Azure AD OAuth settings
     AZURE_AD_CLIENT_ID = os.environ.get('AZURE_AD_CLIENT_ID')
     AZURE_AD_CLIENT_SECRET = os.environ.get('AZURE_AD_CLIENT_SECRET')
     AZURE_AD_TENANT_ID = os.environ.get('AZURE_AD_TENANT_ID')
     AZURE_AD_REDIRECT_URI = os.environ.get('AZURE_AD_REDIRECT_URI')
+
+    # MSAL configuration
+    AZURE_AD_AUTHORITY = f"https://login.microsoftonline.com/{AZURE_AD_TENANT_ID}"
+    AZURE_AD_SCOPES = ["openid", "profile", "email", "User.Read"]
+
+    # Token validation
+    AZURE_AD_TOKEN_ISSUER = f"https://login.microsoftonline.com/{AZURE_AD_TENANT_ID}/v2.0"
+    AZURE_AD_TOKEN_AUDIENCE = AZURE_AD_CLIENT_ID
+else:
+    # Local development fallback
+    AUTHENTICATION_BACKENDS = ['django.contrib.auth.backends.ModelBackend']
 
 # Login/Logout URLs
 LOGIN_URL = 'accounts:login'
@@ -166,5 +177,8 @@ CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 # Session settings
-SESSION_COOKIE_AGE = 86400  # 24 hours
+SESSION_COOKIE_AGE = 3600 if USE_AZURE_AD_SSO else 86400  # 1 hour for SSO, 24 hours otherwise
 SESSION_SAVE_EVERY_REQUEST = True
+SESSION_COOKIE_SECURE = not DEBUG
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = 'Lax'

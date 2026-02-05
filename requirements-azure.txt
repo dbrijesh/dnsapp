@@ -7,6 +7,9 @@ crispy-bootstrap5==2024.2
 azure-storage-blob==12.19.0
 azure-identity==1.15.0
 
+# Azure AD Authentication
+msal==1.28.0
+
 # Static file serving
 whitenoise==6.6.0
 
