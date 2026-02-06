@@ -4,9 +4,13 @@ Django settings for leadup project.
 
 import os
 from pathlib import Path
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load environment variables from .env file
+load_dotenv(BASE_DIR / '.env')
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-dev-key-change-in-production')
@@ -158,7 +162,7 @@ if USE_AZURE_AD_SSO:
 
     # MSAL configuration
     AZURE_AD_AUTHORITY = f"https://login.microsoftonline.com/{AZURE_AD_TENANT_ID}"
-    AZURE_AD_SCOPES = ["openid", "profile", "email", "User.Read"]
+    AZURE_AD_SCOPES = ["User.Read"]  # MSAL automatically adds openid, profile, offline_access
 
     # Token validation
     AZURE_AD_TOKEN_ISSUER = f"https://login.microsoftonline.com/{AZURE_AD_TENANT_ID}/v2.0"

@@ -106,7 +106,10 @@ def auth_callback(request):
 
     # Clean up session
     request.session.pop('azure_auth_state', None)
-    next_url = request.session.pop('next_url', 'learners:dashboard')
+
+    # Determine redirect URL based on user role
+    default_redirect = 'admins:dashboard' if user.is_admin else 'learners:dashboard'
+    next_url = request.session.pop('next_url', default_redirect)
 
     messages.success(request, f"Welcome back, {user.get_full_name() or user.email}!")
     return redirect(next_url)
@@ -141,7 +144,23 @@ def register_view(request):
 
 @login_required
 def logout_view(request):
+    """Log out user from both Django and Azure AD (if SSO enabled)."""
     logout(request)
+
+    if settings.USE_AZURE_AD_SSO:
+        # Log out from Azure AD as well
+        logout_url = (
+            f"https://login.microsoftonline.com/{settings.AZURE_AD_TENANT_ID}/oauth2/v2.0/logout"
+            f"?post_logout_redirect_uri={request.build_absolute_uri(reverse('accounts:logout_complete'))}"
+        )
+        return redirect(logout_url)
+    else:
+        messages.success(request, 'You have been logged out successfully.')
+        return redirect('accounts:login')
+
+
+def logout_complete(request):
+    """Logout completion page after Azure AD logout."""
     messages.success(request, 'You have been logged out successfully.')
     return redirect('accounts:login')
 

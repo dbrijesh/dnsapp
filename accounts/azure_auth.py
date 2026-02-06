@@ -18,8 +18,10 @@ def get_msal_app():
 def build_auth_url(redirect_uri, state):
     """Build Azure AD authorization URL."""
     msal_app = get_msal_app()
+    # Ensure scopes is a list, not a frozenset
+    scopes = list(settings.AZURE_AD_SCOPES) if settings.AZURE_AD_SCOPES else []
     auth_url = msal_app.get_authorization_request_url(
-        scopes=settings.AZURE_AD_SCOPES,
+        scopes=scopes,
         redirect_uri=redirect_uri,
         state=state
     )
@@ -31,9 +33,11 @@ def acquire_token_by_auth_code(auth_code, redirect_uri):
     """Exchange authorization code for access token."""
     msal_app = get_msal_app()
     try:
+        # Ensure scopes is a list, not a frozenset
+        scopes = list(settings.AZURE_AD_SCOPES) if settings.AZURE_AD_SCOPES else []
         result = msal_app.acquire_token_by_authorization_code(
             code=auth_code,
-            scopes=settings.AZURE_AD_SCOPES,
+            scopes=scopes,
             redirect_uri=redirect_uri
         )
         if "error" in result:
